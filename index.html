@@ -8,11 +8,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Oxygen&family=Signika+Negative&family=Staatliches&display=swap" rel="stylesheet"> 
-    <title>Document</title>
+    <title>TicTacToe</title>
 </head>
 <body>
     <header>Tic Tac Toe</header>
-    <div id="mainContainer">
+    <div id="startBox">
+        <span class="startElem" id="startButton">Start</span>
+        <input class="startElem" id="p1Name" autocomplete="off" value="Player 1 name">
+        <input class="startElem" id="p2Name" autocomplete='off' value="Player 2 name">
+    </div>
+    <div id="mainContainer" class="hidden">
     <div id="player">
         <p class="playerTitle" id="p1">Player 1</p>
         <p class="playerTitle" id="p2">Player 2</p>
@@ -20,6 +25,7 @@
     <div id="board"></div>
     <div id="restartContainer">
     <div id="restartButton">Restart</div>
+    <div id="endMessage">Player 1 won!</div>
     </div>
     </div>
 </body>
