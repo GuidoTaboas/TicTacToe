@@ -122,7 +122,6 @@ header {
     box-shadow: 0px 0px 5px 5px #24305E; 
     text-shadow: 0 0 50px #FFF, 2px 2px 2px rgb(55, 70, 206);
     font-size: 1.3em;
-    visibility: hidden;
 }
 
 #startBox {
@@ -157,5 +156,18 @@ header {
     visibility: hidden;
     opacity: 0;
     transition: visibility 0s 0.5s, opacity 0.5s linear;
+    z-index: -10;
+}
+
+.visible2 {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.1s linear;
+  }
+
+.hidden2 {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 0.1s, opacity 0.1s linear;
     z-index: -10;
 }

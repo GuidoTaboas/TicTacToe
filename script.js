@@ -1,65 +1,76 @@
 
-//player moves, owns tiles
-//board has tiles, logic to check legal player movements
-//"referee" check win/lose/tie situations
-//flow: players are created. players move. check win. 
-
 const GameBoard = (() => {
     let Board = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9};
     return {Board};
 })()
 
 const Display = (() => {
-    const board1 = document.getElementById('board');
+    const board = document.getElementById('board');
     const boardArr = GameBoard.Board
+    let endMessageBox = document.getElementById('endMessage')
+
     const display = (GameBoard) => {
         for(let [key] of Object.entries(GameBoard)) {
             div = document.createElement('div');
             div.id = key;
             div.setAttribute('data-player', key);
             div.classList.add('tile');
-            board1.appendChild(div);
+            board.appendChild(div);
         }
     }
 
     const resetBoard = () => {
         let  i = 1
         const tiles = document.querySelectorAll('.tile');
+        document.getElementById('endMessage').classList.remove('visible2')
+        document.getElementById('endMessage').classList.add('hidden2')
         tiles.forEach(item => {
-            boardArr[(item.id - 1)] = i
-            item.setAttribute('data-player', i)
-            item.style.backgroundColor = 'transparent'
-            i++
+            boardArr[(item.id - 1)] = i;
+            item.setAttribute('data-player', i);
+            item.style.backgroundColor = 'transparent';
+            i++;
         })
     }
 
-    const endMessage = (winner) => {
-        let endMessageBox = document.getElementById('endMessage')
-        if(winner === 'p1') {
-            endMessageBox.innerText = `The Player ${document.getElementById('p1').innerText} won `
+    const startBox = () => {
+        const p1Name = document.getElementById('p1Name').value
+        const p2Name = document.getElementById('p2Name').value
+        if (p1Name !== '' && p2Name !== '') {
+            document.getElementById('p1').innerText = p1Name
+            document.getElementById('p2').innerText = p2Name
+            document.getElementById('startBox').classList.add('hidden')
+            document.getElementById('mainContainer').classList.remove('hidden')
+            document.getElementById('mainContainer').classList.add('visible')
         } else {
-            endMessageBox.innerText = `The Player ${document.getElementById('p2').innerText} won `
+            alert("Player's names can't be empty")
         }
-        endMessageBox.style.visibility = 'visible'
     }
 
-    return {resetBoard, display, endMessage}
+    const endMessage = (winner) => {
+        if (document.getElementById(winner)) {
+            endMessageBox.innerText = `The Player ${document.getElementById(winner).innerText} won`
+        } else {
+            endMessageBox.innerText = 'TIE'
+        }
+        console.log('message')
+        document.getElementById('endMessage').classList.remove('hidden2')
+        document.getElementById('endMessage').classList.add('visible2')
+    }
+
+    const tilePlayerColor = (item, player, color) => {
+        item.style.backgroundColor = color;
+        item.setAttribute('data-player', player);
+        GameBoard.Board[item.id - 1] = player;
+    }
+
+    return {resetBoard, display, endMessage, startBox, tilePlayerColor}
 
 })()
-
-const Player = (name) => {
-    return {
-        name
-    }
-}
-
-
-// en lugar de devolver, checkPlayer, estaba devolviendo currentPlayer, y evaluando abajo rules.currentPlayer
-//currentPlayer se actualizaba, pero rules.currentPlayer no se actualizaba, porque?
 
 const Rules = ((P1, P2) => {
     let currentPlayer = P1;
     let board = GameBoard.Board
+    let arr = [1]
 
     const changeTurn = () => {
         if (currentPlayer === P1){
@@ -67,20 +78,27 @@ const Rules = ((P1, P2) => {
         } else {
             currentPlayer = P1;
         } 
+        arr.push('a')
         return currentPlayer
     }   
 
-    const checkPlayer = () => {
-        return currentPlayer
+    const checkPlayer = (item) => {
+        if (currentPlayer === 'p1' && !(['p2', 'p1'].includes(item.getAttribute('data-player')))) {
+            return ['p1', '#F8E9A1']
+        } else if (currentPlayer === 'p2' && !(['p2', 'p1'].includes(item.getAttribute('data-player')))) {
+            return ['p2', '#24305E']
+        }
     }
 
     const checkWin = () => {
-       if (checkCol() || checkDia() || checkRow()) {
-           return 'win'
-       } 
+        return checkCol() || checkDia() || checkRow() || checkTie()
     }
 
-    // if every tile data-player is not in board, means every tile is occupied
+    const checkTie = () => {
+        if (arr.length === 9){
+            return true
+        }
+    }
 
     const checkRow = () => {
         if (board[0] === board[1]&&
@@ -118,56 +136,32 @@ const Rules = ((P1, P2) => {
         } 
     }
 
-    return {changeTurn, checkPlayer, checkWin};
+    const resetArr = () => {
+        arr = [1]
+    }
+
+    return {changeTurn, checkPlayer, checkWin, checkTie, resetArr};
 })('p1', 'p2', board.Board)
 
 Display.display(GameBoard.Board);
 const tiles = document.querySelectorAll('.tile');
-
-tiles.forEach(item => {
-    item.addEventListener('click', function() {
-        if (Rules.checkPlayer() === 'p1' && !(['p2', 'p1'].includes(item.getAttribute('data-player')))) { 
-            item.style.backgroundColor = '#F8E9A1';
-            item.setAttribute('data-player', 'p1');
-            GameBoard.Board[item.id - 1]= 'p1';
-            if (Rules.checkWin()) {
-                Display.resetBoard();
-                Display.endMessage('p1');
-                return;
-            }
-            Rules.changeTurn(); 
-        } else if (Rules.checkPlayer() === 'p2' && !(['p2', 'p1'].includes(item.getAttribute('data-player')))) {
-            item.style.backgroundColor = '#374785';
-            item.setAttribute('data-player', 'p2');
-            GameBoard.Board[item.id - 1]= 'p2';
-            if (Rules.checkWin()) {
-                Display.resetBoard();
-                Display.endMessage('p2');
-                return;
-            }
-            Rules.changeTurn(); 
-        }
-        
-    })
-});
-
 const restartButton = document.getElementById('restartButton')
 const startButton = document.getElementById('startButton')
 
-startButton.addEventListener('click', function() {
-    const p1Name = document.getElementById('p1Name').value
-    const p2Name = document.getElementById('p2Name').value
-    if (p1Name !== '' && p2Name !== '') {
-        document.getElementById('p1').innerText = p1Name
-        document.getElementById('p2').innerText = p2Name
-        document.getElementById('startBox').classList.add('hidden')
-        document.getElementById('mainContainer').classList.remove('hidden')
-        document.getElementById('mainContainer').classList.add('visible')
-    } else {
-        alert("Player's names can't be empty")
-    }
+tiles.forEach(item => {
+    item.addEventListener('click', function() {
+        player = Rules.checkPlayer(item)
+        Display.tilePlayerColor(item, player[0], player[1]);
+        if (Rules.checkWin()) Display.endMessage(Rules.checkWin());
+        Rules.changeTurn();
+    })
+});
 
+startButton.addEventListener('click', function() {
+    Display.startBox()
 })
+
 restartButton.addEventListener('click', function() {
     Display.resetBoard()
+    Rules.resetArr()
 })
